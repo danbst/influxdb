@@ -17,6 +17,57 @@ For rationale, check out the post [The Case Against Third Party Libraries](http:
 ## When -- and when not -- set a channel to 'nil'
 
 ## Use defer with anonymous functions to handle complex locking
+Consider a block of code like the following.
+```
+    mu.Lock()
+    if foo == "quit" {
+        mu.Unlock()
+        return
+    } else if foo == "continue" {
+        if bar == "quit" {
+            mu.Unlock()
+            return
+        }
+        bar = "still going"
+    } else {
+        qux = "here at last"
+        mu.Unlock()
+        return
+    }
+    foo = "more to do"
+    bar = "still more to do"
+    mu.Unlock()
+
+    qux = "finished now"
+    return
+```
+While this is obviously contrived, complex lock control like this is sometimes required, and doesn't lend itself to `defer`. But as the code evolves, it's easy to introduce new cases, and forget to release locks. One way to address this is to use an anonymous function like so:
+```
+    more := func() bool {
+        mu.Lock()
+        defer mu.Unlock()
+        if foo == "quit" {
+            return false
+        } else if foo == "continue" {
+            if bar == "quit" {
+                return false
+            }
+            bar = "still going"
+        } else {
+            qux = "here at last"
+            return false
+        }
+        foo = "more to do"
+        bar = "still more to do"
+        return true
+    }()
+
+    if more {
+        qux = "finished"
+    }
+    return
+```
+This allows us to use `defer` but ensures that if any new cases are added to the logic within the anonymous function, the lock will always be released.
 
 ## When to call 'panic()'
 
