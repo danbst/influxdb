@@ -510,7 +510,7 @@ func (p *Parser) parseUInt64() (uint64, error) {
 // This function assumes the DURATION token has already been consumed.
 func (p *Parser) parseDuration() (time.Duration, error) {
 	tok, pos, lit := p.scanIgnoreWhitespace()
-	if tok != DURATION_VAL && tok != INF {
+	if tok != DURATION_VAL && tok != INF && tok != NUMBER {
 		return 0, newParseError(tokstr(tok, lit), []string{"duration"}, pos)
 	}
 

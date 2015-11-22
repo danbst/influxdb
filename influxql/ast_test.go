@@ -610,7 +610,7 @@ func TestParseString(t *testing.T) {
 			stmt: `DROP RETENTION POLICY "my rp" ON "a database"`,
 		},
 		{
-			stmt: `CREATE RETENTION POLICY "my rp" ON "a database" DURATION 1d REPLICATION 1`,
+			stmt: `CREATE RETENTION POLICY "my rp" ON "a database" DURATION 1234567890u REPLICATION 1`,
 		},
 		{
 			stmt: `ALTER RETENTION POLICY "my rp" ON "a database" DEFAULT`,
